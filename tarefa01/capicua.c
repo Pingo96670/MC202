@@ -1,6 +1,7 @@
 #include <stdio.h>
 #define MAX 10000000000
 
+// Reverses number
 unsigned long long reverse_num(unsigned long long k) {
     unsigned long long i=10, reverse=0, aux_k=k;
 
@@ -12,6 +13,7 @@ unsigned long long reverse_num(unsigned long long k) {
     return reverse;
 }
 
+// Checks if a number is palindromic
 int is_palindrome(unsigned long long k) {
     if (k == reverse_num(k)) {
         return 1;
