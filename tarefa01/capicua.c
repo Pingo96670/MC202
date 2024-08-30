@@ -3,11 +3,11 @@
 
 // Reverses number
 unsigned long long reverse_num(unsigned long long k) {
-    unsigned long long i=10, reverse=0, aux_k=k;
+    unsigned long long reverse=0, aux_k=k;
 
-    for (; i<MAX && aux_k!=0;) {
-        reverse=reverse*10+aux_k%i;
-        aux_k=(aux_k-aux_k%i)/10;
+    while (aux_k!=0) {
+        reverse=reverse*10+aux_k%10;
+        aux_k=(aux_k-aux_k%10)/10;
     };
 
     return reverse;
