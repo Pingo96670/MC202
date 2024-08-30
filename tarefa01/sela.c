@@ -1,7 +1,8 @@
 #include <stdio.h>
+#define MAX 100
 
 // Reads and stores a matrix of max size 100 by 100
-void read_matrix(int matrix[100][100], int rows, int columns) {
+void read_matrix(int matrix[][MAX], int rows, int columns) {
     int i, j;
 
     for (i=0; i<rows; i++) {
@@ -12,7 +13,7 @@ void read_matrix(int matrix[100][100], int rows, int columns) {
 }
 
 // Checks if matrix[i][j] is the only minimum value in row [i]
-int is_min_in_row(int matrix[100][100], int columns, int i, int j) {
+int is_min_in_row(int matrix[][MAX], int columns, int i, int j) {
     int k;
 
     for (k=0; k<columns; k++) {
@@ -25,7 +26,7 @@ int is_min_in_row(int matrix[100][100], int columns, int i, int j) {
 }
 
 // Checks if matrix[i][j] is the only maximum value in column [j]
-int is_max_in_column(int matrix[100][100], int rows, int i, int j) {
+int is_max_in_column(int matrix[][MAX], int rows, int i, int j) {
     int k;
 
     for (k=0; k<rows; k++) {
@@ -38,7 +39,7 @@ int is_max_in_column(int matrix[100][100], int rows, int i, int j) {
 }
 
 // Checks if matrix[i][j] is a saddle point
-int is_saddle_point(int matrix[100][100], int rows, int columns, int i, int j) {
+int is_saddle_point(int matrix[][MAX], int rows, int columns, int i, int j) {
     if (is_min_in_row(matrix, columns, i, j) && is_max_in_column(matrix, rows, i, j)) {
         return 1;
     }
@@ -47,7 +48,7 @@ int is_saddle_point(int matrix[100][100], int rows, int columns, int i, int j) {
 }
 
 int main() {
-    int rows, columns, matrix[100][100];
+    int rows, columns, matrix[MAX][MAX];
     int i=0, j=0;
     int saddle_point_exists=0;
 
