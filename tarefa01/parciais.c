@@ -1,4 +1,5 @@
 #include <stdio.h>
+#define MAX 1000
 
 // Creates copy of int array of size n into another
 void copy_sequence(int sequence[], int sequence_copy[], int n) {
@@ -22,7 +23,7 @@ int partial_sum(int sequence[], int n, int i) {
 
 // Reverses an int array of size n
 void reverse_sequence(int sequence[], int n) {
-    int i, aux[1000];
+    int i, aux[MAX];
 
     copy_sequence(sequence, aux, n);
 
@@ -42,7 +43,7 @@ void print_sequence(int sequence[], int n) {
 }
 
 int main() {
-    int n, sequence[1000];
+    int n, sequence[MAX];
 
     scanf("%d", &n);
 
