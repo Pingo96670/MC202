@@ -26,6 +26,39 @@ typedef struct mem {
 // bat_use
     //1 print used/total ints from memory
 
+// All
+    // Reorganize arguments order
+
+int can_cleanup(mem *bat_mem) {
+    int i;
+
+    for (i=0; i<bat_mem->size/4; i++) {
+        if (bat_mem->num_array[i]==-1) {
+            return 0;
+        }
+    }
+
+    return 1;
+}
+
+void mem_cleanup(mem *bat_mem) {
+    int i=0, *temp_array;
+
+    temp_array=bat_mem->num_array;
+
+    bat_mem->size/=4;
+
+    free(bat_mem->num_array);
+
+    bat_mem->num_array=malloc(bat_mem->size*sizeof(int));
+
+    for (; i<bat_mem->size; i++) {
+        bat_mem->num_array[i]=temp_array[i];
+    }
+
+    free(temp_array);
+}
+
 void double_mem(mem *bat_mem) {
     int i=0, *temp_array;
 
@@ -33,10 +66,16 @@ void double_mem(mem *bat_mem) {
 
     bat_mem->size*=2;
 
+    free(bat_mem->num_array);
+
     bat_mem->num_array=malloc(bat_mem->size*sizeof(int));
 
-    for (; i<bat_mem->size-bat_mem->free; i++) {
+    for (; i<bat_mem->size/2; i++) {
         bat_mem->num_array[i]=temp_array[i];
+    }
+
+    for (; i<bat_mem->size; i++) {
+        bat_mem->num_array[i]=-1;
     }
 
     free(temp_array);
@@ -82,8 +121,24 @@ void bat_alloc(int n_int, mem *bat_mem, int free_mem) {
     printf("%d", start_address);
 }
 
-void bat_free(int address) {
-    printf("bat_free");
+void bat_free(mem *bat_mem, int address) {
+    int n, i, mem_used;
+
+    n=bat_mem->num_array[address];
+    mem_used=bat_mem->size-bat_mem->free;
+
+    for (i=0; i<n+1; i++) {
+        bat_mem->num_array[i]=-1;
+    }
+
+    while (mem_used<bat_mem->size/4 && bat_mem->size>8) {
+        if (can_cleanup(bat_mem)) {
+            mem_cleanup(bat_mem);
+
+        } else {
+            break;
+        }
+    }
 }
 
 void bat_print() {
@@ -123,7 +178,7 @@ int main() {
         } else if (strcmp(command, "bat-free")==0) {
             scanf("%d", &address);
 
-            bat_free(address);
+            bat_free(&bat_mem, address);
 
         } else if (strcmp(command, "bat-print")==0) {
             scanf("%d", &address);
