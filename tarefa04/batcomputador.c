@@ -150,8 +150,10 @@ void bat_print(mem *bat_mem, int address) {
     }
 }
 
-void bat_usage() {
-    printf("bat_uso");
+void bat_usage(mem *bat_mem) {
+    int used=bat_mem->size-bat_mem->free;
+
+    printf("%d de %d", used, bat_mem->size);
 }
 
 int main() {
@@ -191,7 +193,7 @@ int main() {
             bat_print(&bat_mem, address);
 
         } else if (strcmp(command, "bat-uso")==0) {
-            bat_usage();
+            bat_usage(&bat_mem);
 
         } else {
             printf("Comando nao reconhecido");
