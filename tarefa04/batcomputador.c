@@ -21,9 +21,8 @@ typedef struct mem {
 
 // bat_print
     //1 print integers of corresponding array (without its size)
-        // it can refer to the middle of it (?)
 
-// bat_use
+// bat_usage
     //1 print used/total ints from memory
 
 // All
@@ -141,11 +140,17 @@ void bat_free(mem *bat_mem, int address) {
     }
 }
 
-void bat_print() {
-    printf("bat_print");
+void bat_print(mem *bat_mem, int address) {
+    int i, n;
+
+    n=bat_mem->num_array[address];
+
+    for (i=0; i<n; i++) {
+        printf("%d", bat_mem->num_array[address+i+1]);
+    }
 }
 
-void bat_use() {
+void bat_usage() {
     printf("bat_uso");
 }
 
@@ -182,10 +187,11 @@ int main() {
 
         } else if (strcmp(command, "bat-print")==0) {
             scanf("%d", &address);
-            bat_print();
+
+            bat_print(&bat_mem, address);
 
         } else if (strcmp(command, "bat-uso")==0) {
-            bat_use();
+            bat_usage();
 
         } else {
             printf("Comando nao reconhecido");
