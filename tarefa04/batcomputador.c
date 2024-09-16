@@ -9,24 +9,15 @@ typedef struct mem {
 } mem;
 
 // TODO
-// bat_alloc: 
-    //1 alloc [array_size + array]      DONE
-    //2 copy list with double the size, keeping addresses intact        DONE?
-    //3 must store in first position the array fits     DONE?
-    //4 store occupied addresses
-
-// bat_free
-    //1 update free addresses (bat_alloc4)
-    //2 if last 3/4 are free, half list's size, keeping it >8
-
-// bat_print
-    //1 print integers of corresponding array (without its size)
-
-// bat_usage
-    //1 print used/total ints from memory
-
 // All
     // Reorganize arguments order
+    // Cleanup
+
+void debug_print(mem *bat_mem) {
+    for (int i=0; i<bat_mem->size; i++) {
+        printf("%d ", bat_mem->num_array[i]);
+    }
+}
 
 int can_cleanup(mem *bat_mem) {
     int i;
@@ -45,17 +36,14 @@ void mem_cleanup(mem *bat_mem) {
 
     temp_array=bat_mem->num_array;
 
-    bat_mem->size/=4;
-
-    free(bat_mem->num_array);
+    bat_mem->free-=bat_mem->size*1/2;
+    bat_mem->size/=2;
 
     bat_mem->num_array=malloc(bat_mem->size*sizeof(int));
 
     for (; i<bat_mem->size; i++) {
         bat_mem->num_array[i]=temp_array[i];
     }
-
-    free(temp_array);
 }
 
 void double_mem(mem *bat_mem) {
@@ -63,9 +51,10 @@ void double_mem(mem *bat_mem) {
 
     temp_array=bat_mem->num_array;
 
+    bat_mem->free+=bat_mem->size;
     bat_mem->size*=2;
 
-    free(bat_mem->num_array);
+    //free(bat_mem->num_array);
 
     bat_mem->num_array=malloc(bat_mem->size*sizeof(int));
 
@@ -96,16 +85,18 @@ int find_free(mem* bat_mem, int num_search) {
             count=0;
         }
     }
+
+    return -1;
 }
 
-void bat_alloc(int n_int, mem *bat_mem, int free_mem) {
-    int i, temp_int, *temp_array, start_address;
+void bat_alloc(int n_int, mem *bat_mem) {
+    int i, temp_int, start_address;
 
-    temp_array=malloc((n_int+1)*sizeof(int));
-
-    if (free_mem<n_int) {
+    if (n_int+1>bat_mem->free || find_free(bat_mem, n_int+1)==-1) {
         double_mem(bat_mem);
     }
+
+    bat_mem->free-=n_int+1;
 
     start_address=find_free(bat_mem, n_int+1);
 
@@ -117,20 +108,21 @@ void bat_alloc(int n_int, mem *bat_mem, int free_mem) {
         bat_mem->num_array[start_address+i+1]=temp_int;
     }
 
-    printf("%d", start_address);
+    printf("%d\n", start_address);
 }
 
 void bat_free(mem *bat_mem, int address) {
     int n, i, mem_used;
 
     n=bat_mem->num_array[address];
+    bat_mem->free+=n+1;
     mem_used=bat_mem->size-bat_mem->free;
 
     for (i=0; i<n+1; i++) {
-        bat_mem->num_array[i]=-1;
+        bat_mem->num_array[address+i]=-1;
     }
 
-    while (mem_used<bat_mem->size/4 && bat_mem->size>8) {
+    while (mem_used<=bat_mem->size/4 && bat_mem->size>8) {
         if (can_cleanup(bat_mem)) {
             mem_cleanup(bat_mem);
 
@@ -146,18 +138,20 @@ void bat_print(mem *bat_mem, int address) {
     n=bat_mem->num_array[address];
 
     for (i=0; i<n; i++) {
-        printf("%d", bat_mem->num_array[address+i+1]);
+        printf("%d ", bat_mem->num_array[address+i+1]);
     }
+
+    printf("\n");
 }
 
 void bat_usage(mem *bat_mem) {
     int used=bat_mem->size-bat_mem->free;
 
-    printf("%d de %d", used, bat_mem->size);
+    printf("%d de %d\n", used, bat_mem->size);
 }
 
 int main() {
-    int n, i, n_int, address, bat_mem_old[8], free_mem=8, size=8, *temp;
+    int n, i, n_int, address;
     mem bat_mem;
     char command[10];
 
@@ -178,9 +172,7 @@ int main() {
         if (strcmp(command, "bat-alloc")==0) {
             scanf("%d", &n_int);
 
-            free_mem-=n_int+1;
-
-            bat_alloc(n_int, &bat_mem, free_mem);
+            bat_alloc(n_int, &bat_mem);
 
         } else if (strcmp(command, "bat-free")==0) {
             scanf("%d", &address);
@@ -195,8 +187,12 @@ int main() {
         } else if (strcmp(command, "bat-uso")==0) {
             bat_usage(&bat_mem);
 
+        } else if (strcmp(command, "debug")==0) {
+            debug_print(&bat_mem);
+
         } else {
             printf("Comando nao reconhecido");
+            break;
         }
         
     }
