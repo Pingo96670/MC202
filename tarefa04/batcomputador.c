@@ -197,5 +197,7 @@ int main() {
         } 
     }
 
+    free(bat_mem.num_array);
+
     return 0;
 }
