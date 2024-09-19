@@ -1,0 +1,29 @@
+--2024-09-16 20:13:42--  https://update.code.visualstudio.com/commit:38c31bc77e0dd6ae88a4e9cc93428cc27a56ba40/server-linux-x64/stable
+Resolving update.code.visualstudio.com (update.code.visualstudio.com)... 13.107.246.33, 2620:1ec:bdf::33
+Connecting to update.code.visualstudio.com (update.code.visualstudio.com)|13.107.246.33|:443... connected.
+HTTP request sent, awaiting response... No data received.
+Retrying.
+
+--2024-09-16 20:14:53--  (try: 2)  https://update.code.visualstudio.com/commit:38c31bc77e0dd6ae88a4e9cc93428cc27a56ba40/server-linux-x64/stable
+Connecting to update.code.visualstudio.com (update.code.visualstudio.com)|13.107.246.33|:443... connected.
+HTTP request sent, awaiting response... 302 Found
+Location: https://vscode.download.prss.microsoft.com/dbazure/download/stable/38c31bc77e0dd6ae88a4e9cc93428cc27a56ba40/vscode-server-linux-x64.tar.gz [following]
+--2024-09-16 20:14:56--  https://vscode.download.prss.microsoft.com/dbazure/download/stable/38c31bc77e0dd6ae88a4e9cc93428cc27a56ba40/vscode-server-linux-x64.tar.gz
+Resolving vscode.download.prss.microsoft.com (vscode.download.prss.microsoft.com)... 152.199.52.147, 2606:2800:157:3ac:1a2e:26c9:99c:8f9
+Connecting to vscode.download.prss.microsoft.com (vscode.download.prss.microsoft.com)|152.199.52.147|:443... connected.
+HTTP request sent, awaiting response... 200 OK
+Length: 60061264 (57M) [application/octet-stream]
+Saving to: ‘/home/pingo/.vscode-server/bin/38c31bc77e0dd6ae88a4e9cc93428cc27a56ba40-1726528414.tar.gz’
+
+     0K .......... .......... .......... .......... ..........  0% 1.57M 37s
+    50K .......... .......... .......... .......... ..........  0% 1.45M 38s
+   100K .......... .......... .......... .......... ..........  0% 1.92M 35s
+   150K .......... .......... .......... .......... .           0% 4.32M=0.1s
+
+2024-09-16 20:29:56 (1.88 MB/s) - Read error at byte 196602/60061264 (Connection timed out). Retrying.
+
+--2024-09-16 20:29:57--  (try: 2)  https://vscode.download.prss.microsoft.com/dbazure/download/stable/38c31bc77e0dd6ae88a4e9cc93428cc27a56ba40/vscode-server-linux-x64.tar.gz
+Connecting to vscode.download.prss.microsoft.com (vscode.download.prss.microsoft.com)|152.199.52.147|:443... failed: Connection timed out.
+Connecting to vscode.download.prss.microsoft.com (vscode.download.prss.microsoft.com)|2606:2800:157:3ac:1a2e:26c9:99c:8f9|:443... failed: Network is unreachable.
+Resolving vscode.download.prss.microsoft.com (vscode.download.prss.microsoft.com)... failed: Temporary failure in name resolution.
+wget: unable to resolve host address ‘vscode.download.prss.microsoft.com’
