@@ -1,14 +1,30 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#define MAX_COMMAND_LENGTH 10
+#define INITIAL_MEMORY_SIZE 8
 
 
 typedef struct mem {
     int size;
     int *num_array;
-    int free;
+    int free_space;
 } mem;
 
+// Function to initialize a mem type variable
+// Sets all values in memory.num_array to -1, indicating free slots
+void initialize_mem(mem *memory) {
+    int i;
+
+    memory->size=INITIAL_MEMORY_SIZE;
+    memory->free_space=INITIAL_MEMORY_SIZE;
+
+    memory->num_array=malloc(INITIAL_MEMORY_SIZE*sizeof(int));
+
+    for (i=0; i<INITIAL_MEMORY_SIZE; i++) {
+        memory->num_array[i]=-1;
+    }
+}
 
 // Function to expand memory, doubling its size
 void double_mem(mem *bat_mem) {
@@ -16,7 +32,7 @@ void double_mem(mem *bat_mem) {
 
     temp_array=bat_mem->num_array;
 
-    bat_mem->free+=bat_mem->size;
+    bat_mem->free_space+=bat_mem->size;
     bat_mem->size*=2;
 
     bat_mem->num_array=malloc(bat_mem->size*sizeof(int));
@@ -58,11 +74,11 @@ int find_free(mem* bat_mem, int num_search) {
 void bat_alloc(mem *bat_mem, int n_int) {
     int i, temp_int, start_address;
 
-    if (n_int+1>bat_mem->free || find_free(bat_mem, n_int+1)==-1) {
+    if (n_int+1>bat_mem->free_space || find_free(bat_mem, n_int+1)==-1) {
         double_mem(bat_mem);
     }
 
-    bat_mem->free-=n_int+1;
+    bat_mem->free_space-=n_int+1;
 
     start_address=find_free(bat_mem, n_int+1);
 
@@ -96,7 +112,7 @@ void mem_cleanup(mem *bat_mem) {
 
     temp_array=bat_mem->num_array;
 
-    bat_mem->free-=bat_mem->size*1/2;
+    bat_mem->free_space-=bat_mem->size*1/2;
     bat_mem->size/=2;
 
     bat_mem->num_array=malloc(bat_mem->size*sizeof(int));
@@ -113,8 +129,8 @@ void bat_free(mem *bat_mem, int address) {
     int n, i, mem_used;
 
     n=bat_mem->num_array[address];
-    bat_mem->free+=n+1;
-    mem_used=bat_mem->size-bat_mem->free;
+    bat_mem->free_space+=n+1;
+    mem_used=bat_mem->size-bat_mem->free_space;
 
     for (i=0; i<n+1; i++) {
         bat_mem->num_array[address+i]=-1;
@@ -147,7 +163,7 @@ void bat_print(mem *bat_mem, int address) {
 // Bat_usage command
 // Prints out used/total memory
 void bat_usage(mem *bat_mem) {
-    int used=bat_mem->size-bat_mem->free;
+    int used=bat_mem->size-bat_mem->free_space;
 
     printf("%d de %d\n", used, bat_mem->size);
 }
@@ -157,16 +173,9 @@ void bat_usage(mem *bat_mem) {
 int main() {
     int n, i, n_int, address;
     mem bat_mem;
-    char command[10];
+    char command[MAX_COMMAND_LENGTH];
 
-    bat_mem.size=8;
-    bat_mem.free=8;
-
-    bat_mem.num_array=malloc(8*sizeof(int));
-
-    for (i=0; i<8; i++) {
-        bat_mem.num_array[i]=-1;
-    }
+    initialize_mem(&bat_mem);
 
     scanf("%d", &n);
 
