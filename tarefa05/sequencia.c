@@ -75,7 +75,7 @@ node remove_nucleotide(node DNA_start, int pos) {
 
 void reverse_prefix(node DNA_start, int len) {
     int i;
-    char temp;
+    char *temp;
     node start, end;
 
     start=DNA_start;
@@ -92,9 +92,35 @@ void reverse_prefix(node DNA_start, int len) {
     if (len-2>1) {
         reverse_prefix(start->next, len-2);
     }
+
+    free(temp);
 }
 
-void reverse_suffix();
+void reverse_suffix(node DNA_start, int len) {
+    int i;
+    char *temp;
+    node start, end;
+
+    end=DNA_start;
+    
+    for (; end->next!=NULL; end=end->next);
+
+    start=end;
+
+    for (i=0; i<len-1; i++) {
+        start=start->previous;
+    }
+    
+    temp=start->nucleotide;
+    start->nucleotide=end->nucleotide;
+    end->nucleotide=temp;
+
+    if (len-2>1) {
+        reverse_prefix(start->next, len-2);
+    }
+
+    free(temp);
+}
 
 void transpose_sequence();
 
@@ -124,12 +150,12 @@ int main() {
         } else if (strcmp(command, "inverter-prefixo")==0) {
             scanf("%d", &length);
 
-            reverse_prefix();
+            reverse_prefix(DNA_sequence_start, length);
 
         } else if (strcmp(command, "inverter-sufixo")==0) {
             scanf("%d", &length);
 
-            reverse_suffix();
+            reverse_suffix(DNA_sequence_start, length);
 
         } else if (strcmp(command, "transpor")==0) {
             scanf("%d %d %d", &start, &end, &position);
