@@ -76,7 +76,6 @@ node remove_nucleotide(node DNA_start, int pos) {
 
     printf("%c removido de %d", sequence->nucleotide, pos);
 
-    //free(sequence->nucleotide);
     free(sequence);
 
     return DNA_start;
@@ -247,7 +246,7 @@ int main() {
         } else if (strcmp(command, "remover")==0) {
             scanf("%d", &position);
 
-            remove_nucleotide(DNA_sequence_start, position);
+            DNA_sequence_start=remove_nucleotide(DNA_sequence_start, position);
 
 
 
