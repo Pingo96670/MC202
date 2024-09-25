@@ -7,39 +7,48 @@
 typedef struct node_type *node;
 
 struct node_type {
-    char *nucleotide;
+    char nucleotide;
     node previous;
     node next;
 };
 
-node insert_nucleotide(node DNA_start, char *nucleotide, int pos) {
+node insert_nucleotide(node DNA_start, char nucleotide, int pos) {
     int i;
-    node new, sequence;
-
-    sequence=DNA_start;
-
-    for (i=0; i<pos; i++) {
-        sequence=sequence->next;
-    }
-
+    node new, previous_node;
+    
     new=malloc(sizeof(struct node_type));
-    new->nucleotide=malloc(sizeof(char));
 
     new->nucleotide=nucleotide;
 
-    new->next=sequence;
-
-    if (sequence!=NULL) {
-        new->previous=sequence->previous;
-    } else {
-        new->previous=NULL;
-    }
-
     if (pos==0) {
+        new->previous=NULL;
+        new->next=DNA_start;
+
+        if (DNA_start!=NULL) {
+            DNA_start->previous=new;
+        }
+
+        printf("%c inserido em %d", nucleotide, pos);
+
         return new;
+
+    } else {
+        previous_node=DNA_start;
+        for (i=0; i<pos-1; i++) {
+            previous_node=previous_node->next;
+        }
+    }    
+
+    new->previous=previous_node;
+
+    if (previous_node->next!=NULL) {
+        previous_node->next->previous=new;
     }
 
-    printf("%s inserido em %d", nucleotide, pos);
+    new->next=previous_node->next;
+    previous_node->next=new;
+
+    printf("%c inserido em %d", nucleotide, pos);
 
     return DNA_start;
 }
@@ -47,7 +56,7 @@ node insert_nucleotide(node DNA_start, char *nucleotide, int pos) {
 node remove_nucleotide(node DNA_start, int pos) {
     int i;
     node sequence;
-    char nucleotide[1];
+    char nucleotide;
 
     sequence=DNA_start;
 
@@ -65,9 +74,9 @@ node remove_nucleotide(node DNA_start, int pos) {
         sequence->next->previous=sequence->previous;
     }
 
-    printf("%s removido de %d", sequence->nucleotide, pos);
+    printf("%c removido de %d", sequence->nucleotide, pos);
 
-    free(sequence->nucleotide);
+    //free(sequence->nucleotide);
     free(sequence);
 
     return DNA_start;
@@ -75,7 +84,7 @@ node remove_nucleotide(node DNA_start, int pos) {
 
 void reverse_prefix(node DNA_start, int len) {
     int i;
-    char *temp;
+    char temp;
     node start, end;
 
     start=DNA_start;
@@ -93,12 +102,12 @@ void reverse_prefix(node DNA_start, int len) {
         reverse_prefix(start->next, len-2);
     }
 
-    free(temp);
+    //free(temp);
 }
 
 void reverse_suffix(node DNA_start, int len) {
     int i;
-    char *temp;
+    char temp;
     node start, end;
 
     end=DNA_start;
@@ -119,7 +128,7 @@ void reverse_suffix(node DNA_start, int len) {
         reverse_prefix(start->next, len-2);
     }
 
-    free(temp);
+    //free(temp);
 }
 
 node transpose_sequence(node DNA_start, int start, int end, int offset) {
@@ -185,8 +194,8 @@ void print_sequence(node sequence_start, int is_subsequence, int len) {
     current=sequence_start;
 
     if (!is_subsequence) {
-        while (sequence_start->next!=NULL) {
-            printf("%s ", current->nucleotide);
+        while (current!=NULL) {
+            printf("%c ", current->nucleotide);
             current=current->next;
         }
     } else {
@@ -204,7 +213,7 @@ void free_sequence(node DNA_sequence) {
 
     while (temp_current!=NULL) {
         temp_next=temp_current->next;
-        free(temp_current->nucleotide);
+        //free(temp_current->nucleotide);
         free(temp_current);
         temp_current=temp_next;
     }
@@ -216,51 +225,91 @@ void free_sequence(node DNA_sequence) {
 
 int main() {
     int exit=0, position, length, start, end, offset;
-    char command[MAX_COMMAND_LENGTH], *nucleotide;
-    node DNA_sequence_start=NULL;
+    char command[MAX_COMMAND_LENGTH], nucleotide;
+    node DNA_sequence_start=NULL, start_node;
     
     while (!exit) {
+        
         scanf("%s", command);
 
         if (strcmp(command, "inserir")==0) {
-            scanf("%s %d", nucleotide, &position);
+            scanf("%*[ ]%c%d", &nucleotide, &position);
 
-            insert_nucleotide(DNA_sequence_start, nucleotide, position);
+            exit=0;
+
+            DNA_sequence_start=insert_nucleotide(DNA_sequence_start, nucleotide, position);
+
+
+
+
+
 
         } else if (strcmp(command, "remover")==0) {
             scanf("%d", &position);
 
             remove_nucleotide(DNA_sequence_start, position);
 
+
+
+
+
         } else if (strcmp(command, "inverter-prefixo")==0) {
             scanf("%d", &length);
 
+            print_sequence(start_node, 0, 0);
+
             reverse_prefix(DNA_sequence_start, length);
+
+            print_sequence(start_node, 0, 0);
+
+
+
+
 
         } else if (strcmp(command, "inverter-sufixo")==0) {
             scanf("%d", &length);
 
+            print_sequence(start_node, 0, 0);
+
             reverse_suffix(DNA_sequence_start, length);
+
+            print_sequence(start_node, 0, 0);
+
+
 
         } else if (strcmp(command, "transpor")==0) {
             scanf("%d %d %d", &start, &end, &offset);
 
+            print_sequence(start_node, 0, 0);
+
             transpose_sequence(DNA_sequence_start, start, end, offset);
 
+            print_sequence(start_node, 0, 0);
+
+
         } else if (strcmp(command, "imprimir")==0) {
+            printf("sequencia ");
             print_sequence(DNA_sequence_start, 0, 0);
+
+
+
+
 
         } else if (strcmp(command, "sair")==0) {
             exit=1;
 
+
+
+
+
         } else {
             printf("Comando nao reconhecido");
-        } 
+        }
+
+        printf("\n");
     }
 
     free_sequence(DNA_sequence_start);
-
-    free(DNA_sequence_start);
 
     return 0;
 }
