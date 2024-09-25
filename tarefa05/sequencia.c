@@ -12,8 +12,15 @@ struct node_type {
     node next;
 };
 
-node insert_nucleotide(node sequence, char *nucleotide, int pos) {
-    node new;
+node insert_nucleotide(node DNA_start, char *nucleotide, int pos) {
+    int i;
+    node new, sequence;
+
+    sequence=DNA_start;
+
+    for (i=0; i<pos; i++) {
+        sequence=sequence->next;
+    }
 
     new=malloc(sizeof(struct node_type));
     new->nucleotide=malloc(sizeof(char));
@@ -27,9 +34,38 @@ node insert_nucleotide(node sequence, char *nucleotide, int pos) {
     } else {
         new->previous=NULL;
     }
-};
 
-void remove_nucleotide();
+    if (pos==0) {
+        return new;
+    }
+
+    return DNA_start;
+}
+
+node remove_nucleotide(node DNA_start, int pos) {
+    int i;
+    node sequence;
+
+    sequence=DNA_start;
+
+    for (i=0; i<pos; i++) {
+        sequence=sequence->next;
+    }
+
+    if (pos!=0) {
+        sequence->previous->next=sequence->next;
+    } else {
+        DNA_start=sequence->next;
+    }
+
+    if (sequence->next!=NULL) {
+        sequence->next->previous=sequence->previous;
+    }
+
+    free(sequence);
+    
+    return DNA_start;
+}
 
 void reverse_prefix();
 
@@ -45,7 +81,7 @@ void free_sequence();
 int main() {
     int exit=0, position, length, start, end;
     char command[MAX_COMMAND_LENGTH], *nucleotide;
-    node DNA_sequence=NULL;
+    node DNA_sequence_start=NULL;
     
     while (!exit) {
         scanf("%s", command);
@@ -53,7 +89,7 @@ int main() {
         if (strcmp(command, "inserir")==0) {
             scanf("%s %d", nucleotide, &position);
 
-            insert_nucleotide(DNA_sequence, nucleotide, position);
+            insert_nucleotide(DNA_sequence_start, nucleotide, position);
 
         } else if (strcmp(command, "remover")==0) {
             scanf("%d", &position);
