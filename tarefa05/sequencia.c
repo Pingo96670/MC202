@@ -197,7 +197,21 @@ void print_sequence(node sequence_start, int is_subsequence, int len) {
     }
 }
 
-void free_sequence(node DNA_sequence);
+void free_sequence(node DNA_sequence) {
+    node temp_next, temp_current;
+
+    temp_current=DNA_sequence;
+
+    while (temp_current!=NULL) {
+        temp_next=temp_current->next;
+        free(temp_current->nucleotide);
+        free(temp_current);
+        temp_current=temp_next;
+    }
+
+    free(temp_current);
+    free(temp_next);
+}
 
 
 int main() {
@@ -244,7 +258,9 @@ int main() {
         } 
     }
 
-    free_sequence();
+    free_sequence(DNA_sequence_start);
+
+    free(DNA_sequence_start);
 
     return 0;
 }
