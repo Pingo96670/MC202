@@ -124,7 +124,25 @@ void reverse_suffix(node DNA_start, int len) {
 
 void transpose_sequence();
 
-void print_sequence();
+
+void print_sequence(node sequence_start, int is_subsequence, int len) {
+    int i;
+    node current;
+
+    current=sequence_start;
+
+    if (!is_subsequence) {
+        while (sequence_start->next!=NULL) {
+            printf("%s ", current->nucleotide);
+            current=current->next;
+        }
+    } else {
+        for (i=0; i<len; i++) {
+            printf("%s ", current->nucleotide);
+            current=current->next;
+        }
+    }
+}
 
 void free_sequence();
 
@@ -163,7 +181,7 @@ int main() {
             transpose_sequence();
 
         } else if (strcmp(command, "imprimir")==0) {
-            print_sequence();
+            print_sequence(DNA_sequence_start, 0, 0);
 
         } else if (strcmp(command, "sair")==0) {
             exit=1;
