@@ -39,12 +39,15 @@ node insert_nucleotide(node DNA_start, char *nucleotide, int pos) {
         return new;
     }
 
+    printf("%s inserido em %d", nucleotide, pos);
+
     return DNA_start;
 }
 
 node remove_nucleotide(node DNA_start, int pos) {
     int i;
     node sequence;
+    char nucleotide[1];
 
     sequence=DNA_start;
 
@@ -62,12 +65,34 @@ node remove_nucleotide(node DNA_start, int pos) {
         sequence->next->previous=sequence->previous;
     }
 
+    printf("%s removido de %d", sequence->nucleotide, pos);
+
+    free(sequence->nucleotide);
     free(sequence);
-    
+
     return DNA_start;
 }
 
-void reverse_prefix();
+void reverse_prefix(node DNA_start, int len) {
+    int i;
+    char temp;
+    node start, end;
+
+    start=DNA_start;
+    end=DNA_start;
+    
+    for (i=0; i<len-1; i++) {
+        end=end->next;
+    }
+    
+    temp=start->nucleotide;
+    start->nucleotide=end->nucleotide;
+    end->nucleotide=temp;
+
+    if (len-2>1) {
+        reverse_prefix(start->next, len-2);
+    }
+}
 
 void reverse_suffix();
 
@@ -94,7 +119,7 @@ int main() {
         } else if (strcmp(command, "remover")==0) {
             scanf("%d", &position);
 
-            remove_nucleotide();
+            remove_nucleotide(DNA_sequence_start, position);
 
         } else if (strcmp(command, "inverter-prefixo")==0) {
             scanf("%d", &length);
