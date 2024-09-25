@@ -56,7 +56,6 @@ node insert_nucleotide(node DNA_start, char nucleotide, int pos) {
 node remove_nucleotide(node DNA_start, int pos) {
     int i;
     node sequence;
-    char nucleotide;
 
     sequence=DNA_start;
 
@@ -100,8 +99,6 @@ void reverse_prefix(node DNA_start, int len) {
     if (len-2>1) {
         reverse_prefix(start->next, len-2);
     }
-
-    //free(temp);
 }
 
 void reverse_suffix(node DNA_start, int len) {
@@ -126,60 +123,70 @@ void reverse_suffix(node DNA_start, int len) {
     if (len-2>1) {
         reverse_prefix(start->next, len-2);
     }
-
-    //free(temp);
 }
 
 node transpose_sequence(node DNA_start, int start, int end, int offset) {
     int i;
     node start_node, end_node, temp_node;
 
-    start_node=DNA_start;
-    end_node=DNA_start;
+    if (offset!=0) {
+        start_node=DNA_start;
+        end_node=DNA_start;
 
-    for (i=0; i<start; i++) {
-        start_node=start_node->next;
-    }
+        for (i=0; i<start; i++) {
+            start_node=start_node->next;
+        }
 
-    for (i=0; i<end; i++) {
-        end_node=end_node->next;
-    }
+        for (i=0; i<end; i++) {
+            end_node=end_node->next;
+        }
 
-    if (start=0) {
-        DNA_start=end_node->next;
-    }
+        if (start==0) {
+            DNA_start=end_node->next;
+        }
 
-    if (offset>0) {
-        temp_node=end_node->next;
+        if (offset>0) {
+            temp_node=end_node->next->next;
 
-        start_node->previous->next=end_node->next;
-        end_node->next->previous=start_node->previous;
+            if (start_node->previous!=NULL) {
+                start_node->previous->next=end_node->next;
+            } else {
+                DNA_start=start_node->next;
+            }
 
-        start_node->previous=end_node->next;
-        end_node->next=start_node;
+            end_node->next->previous=start_node->previous;
 
-        temp_node->next->previous=end_node;
-        end_node->next=temp_node->next;
+            start_node->previous=end_node->next;
+            end_node->next->next=start_node;
 
-        free(temp_node);
+            if (temp_node!=NULL) {
+                temp_node->previous=end_node;
+            }
 
-        transpose_sequence(DNA_start, start+1, end+1, offset-1);
+            end_node->next=temp_node;
 
-    } else if (offset<0) {
-        temp_node=start_node->previous;
+            transpose_sequence(DNA_start, start+1, end+1, offset-1);
 
-        end_node->next->previous=start_node->previous;
-        start_node->previous->next=end_node->next;
+        } else if (offset<0) {
+            temp_node=start_node->previous->previous;
 
-        end_node->next=start_node->previous;
-        start_node->previous=end_node;
+            if (end_node->next!=NULL){
+                end_node->next->previous=start_node->previous;
+            }
 
-        temp_node->previous->next=start_node;
-        start_node->previous=temp_node->previous;
+            start_node->previous->next=end_node->next;
 
-        free(temp_node);
+            end_node->next=start_node->previous;
+            start_node->previous->previous=end_node;
 
-        transpose_sequence(DNA_start, start-1, end-1, offset+1);
+            if (temp_node!=NULL) {
+                temp_node->next=start_node;
+            }
+            
+            start_node->previous=temp_node;
+
+            transpose_sequence(DNA_start, start-1, end-1, offset+1);
+        }
     }
 
     return DNA_start;
@@ -199,7 +206,7 @@ void print_sequence(node sequence_start, int is_subsequence, int len) {
         }
     } else {
         for (i=0; i<len; i++) {
-            printf("%s ", current->nucleotide);
+            printf("%c ", current->nucleotide);
             current=current->next;
         }
     }
@@ -223,18 +230,16 @@ void free_sequence(node DNA_sequence) {
 
 
 int main() {
-    int exit=0, position, length, start, end, offset;
+    int i, position, length, start, end, offset;
     char command[MAX_COMMAND_LENGTH], nucleotide;
     node DNA_sequence_start=NULL, start_node;
     
-    while (!exit) {
+    while (1) {
         
         scanf("%s", command);
 
         if (strcmp(command, "inserir")==0) {
             scanf("%*[ ]%c%d", &nucleotide, &position);
-
-            exit=0;
 
             DNA_sequence_start=insert_nucleotide(DNA_sequence_start, nucleotide, position);
 
@@ -255,36 +260,60 @@ int main() {
         } else if (strcmp(command, "inverter-prefixo")==0) {
             scanf("%d", &length);
 
-            print_sequence(start_node, 0, 0);
+            printf("prefixo ");
+
+            print_sequence(DNA_sequence_start, 1, length);
+
+            printf("-> ");
 
             reverse_prefix(DNA_sequence_start, length);
 
-            print_sequence(start_node, 0, 0);
-
-
-
+            print_sequence(DNA_sequence_start, 1, length);
 
 
         } else if (strcmp(command, "inverter-sufixo")==0) {
             scanf("%d", &length);
 
-            print_sequence(start_node, 0, 0);
+            start_node=DNA_sequence_start;
+
+            for (; start_node->next!=NULL; start_node=start_node->next);
+
+            for (i=0; i<length-1; i++) {
+                start_node=start_node->previous;
+            }
+
+            printf("sufixo ");
+
+            print_sequence(start_node, 1, length);
+
+            printf("-> ");
 
             reverse_suffix(DNA_sequence_start, length);
 
-            print_sequence(start_node, 0, 0);
+            print_sequence(start_node, 1, length);
 
 
 
         } else if (strcmp(command, "transpor")==0) {
             scanf("%d %d %d", &start, &end, &offset);
 
-            print_sequence(start_node, 0, 0);
+            start_node=DNA_sequence_start;
 
-            transpose_sequence(DNA_sequence_start, start, end, offset);
+            for (i=0; i<start; i++) {
+                start_node=start_node->next;
+            }
 
-            print_sequence(start_node, 0, 0);
+            printf("subsequencia ");
 
+            print_sequence(start_node, 1, end-start+1);
+
+            if (offset>0) {
+                printf(">> %d", offset);
+            } else {
+                printf("<< %d", -1*offset);
+            }
+
+            DNA_sequence_start=transpose_sequence(DNA_sequence_start, start, end, offset);
 
         } else if (strcmp(command, "imprimir")==0) {
             printf("sequencia ");
@@ -295,7 +324,7 @@ int main() {
 
 
         } else if (strcmp(command, "sair")==0) {
-            exit=1;
+            break;
 
 
 
