@@ -11,6 +11,7 @@ typedef struct pos {
 typedef struct node_type *node;
 struct node_type {
     pos position;
+    int is_head;
     node previous;
     node next;
 };
@@ -19,11 +20,15 @@ struct node_type {
 node create_head(int head_x, int head_y) {
     node head;
 
+    head=malloc(sizeof(struct node_type));
+
     head->next=head;
     head->previous=head;
 
     head->position.x=head_x;
     head->position.y=head_y;
+
+    head->is_head=1;
 
     return head;
 }
@@ -57,9 +62,31 @@ void move(node head, int move_x, int move_y) {
     }
 }
 
-void eat_fruit(node head);
+int collision_check(node head, pos fruit) {
+    int i;
+    node current_node;
+    current_node=head->next;
 
-void collision_check(node head);
+    if (head->position.x==fruit.x && head->position.y==fruit.y) {
+        eat_fruit(head)
+    }
+
+    while (!current_node->is_head) {
+        if (head->position.x==current_node->position.x && head->position.y==current_node->position.y) {
+            return 1;
+        } else {
+            current_node=current_node->next;
+        }
+    }
+
+    return 0;
+}
+
+void eat_fruit(node head) {
+    if 
+}
+
+
 
 void print_board();
 
