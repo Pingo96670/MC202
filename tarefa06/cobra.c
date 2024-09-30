@@ -37,9 +37,25 @@ pos create_fruit(int fruit_x, int fruit_y) {
     return fruit;    
 }
 
-void move_x(node head, int x);
+void move(node head, int move_x, int move_y) {
+    node temp_node=head->previous;
 
-void move_y(node head, int y);
+    head->previous->position=head->position;
+
+    head->position.x+=move_x;
+    head->position.y+=move_y;
+
+    if (head->previous!=NULL) {
+        head->previous->previous->next=head;
+        head->previous=head->previous->previous;
+
+        temp_node->previous=head;
+        temp_node->next=head->next;
+
+        head->next->previous=temp_node;
+        head->next=temp_node;
+    }
+}
 
 void eat_fruit(node head);
 
