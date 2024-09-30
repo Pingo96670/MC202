@@ -23,7 +23,7 @@ struct node_type {
     node next;
 };
 
-char create_matrix(int i, int j) {
+char **create_matrix(int i, int j) {
     int k, l;
     char **matrix;
 
@@ -33,7 +33,7 @@ char create_matrix(int i, int j) {
         matrix[k]=malloc(j*sizeof(char));
 
         for (l=0; l<j; l++) {
-            matrix[k][l]="_";
+            matrix[k][l]=95;
         }
     }
 
@@ -66,11 +66,30 @@ pos create_fruit(int fruit_x, int fruit_y) {
     return fruit;    
 }
 
+void eat_fruit(node head, int move_x, int move_y) {
+    node new, temp;
+
+    new=malloc(sizeof(node));
+
+    new->is_head=0;
+
+    new->position=head->position;  
+
+    head->next->previous=new;
+    new->next=head->previous;
+
+    new->previous=head;
+    head->next=new;
+    
+    head->position.x+=move_x;
+    head->position.y+=move_y;
+}
+
 void move(node head, int move_x, int move_y, pos fruit, int *n_eaten) {
     node temp_node=head->previous;
 
     if (head->position.x==fruit.x && head->position.y==fruit.y) {
-        n_eaten++;
+        *n_eaten++;
         eat_fruit(head, move_x, move_y);
     } else {
 
@@ -109,31 +128,20 @@ int self_collision_check(node head) {
     return 0;
 }
 
-void eat_fruit(node head, int move_x, int move_y) {
-    node new, temp;
-
-    new=malloc(sizeof(node));
-
-    new->is_head=0;
-
-    new->position=head->position;  
-
-    head->next->previous=new;
-    new->next=head->previous;
-
-    new->previous=head;
-    head->next=new;
-    
-    head->position.x+=move_x;
-    head->position.y+=move_y;
-}
 
 
 
-void print_board(char **board) {
+
+void print_board(board board) {
     int i, j;
 
-    for (i=0, i<)
+    for (i=0; i<board.size_y; i++) {
+        for (j=0; j<board.size_x; j++) {
+            printf("%c ", board.data[i][j]);
+        }
+
+        printf("\n");
+    }
 }
 
 
@@ -145,15 +153,15 @@ int main() {
     node head;
 
     // Cria a matriz correspondente ao mapa
-    scanf("%d %d", &i, &j);
+    scanf("%s %d %d", command, &i, &j);
     board.data=create_matrix(i, j);
     board.size_x=j;
     board.size_y=i;
 
     // Cria e posiciona a cobra
-    scanf("%d %d", &i, &j);
+    scanf("%s %d %d", command,&i, &j);
     head=create_head(j, i);
-    board.data[i][j]="#";
+    board.data[i][j]=35;
 
     while (!game_end) {
         scanf("%s", command);
@@ -164,44 +172,54 @@ int main() {
 
             fruit=create_fruit(j, i);
 
-            board.data[i][j]="*";
+            board.data[i][j]=42;
 
         } else if (strcmp(command, "w")==0) {
 
-            board.data[head->previous->position.y][head->previous->position.x]="_";
-            board.data[head->position.y+1][head->position.x]="#";
+            if (!(head->position.x==fruit.x && head->position.y==fruit.y)) {
+                board.data[head->previous->position.y][head->previous->position.x]=95;
+            }
+            board.data[head->position.y-1][head->position.x]=35;
 
-            move(head, 0, 1, fruit, n_eaten);
+            move(head, 0, 1, fruit, &n_eaten);
             game_end=self_collision_check(head);
 
         } else if (strcmp(command, "a")==0) {
 
-            board.data[head->previous->position.y][head->previous->position.x]="_";
-            board.data[head->position.y][head->position.x-1]="#";
+            if (!(head->position.x==fruit.x && head->position.y==fruit.y)) {
+                board.data[head->previous->position.y][head->previous->position.x]=95;
+            }
+            board.data[head->position.y][head->position.x-1]=35;
 
-            move(head, -1, 0, fruit, n_eaten);
+            move(head, -1, 0, fruit, &n_eaten);
             game_end=self_collision_check(head);
 
         } else if (strcmp(command, "s")==0) {
 
-            board.data[head->previous->position.y][head->previous->position.x]="_";
-            board.data[head->position.y-1][head->position.x]="#";
+            if (!(head->position.x==fruit.x && head->position.y==fruit.y)) {
+                board.data[head->previous->position.y][head->previous->position.x]=95;
+            }
+            board.data[head->position.y+1][head->position.x]=35;
 
-            move(head, 0, -1, fruit, n_eaten);
+            move(head, 0, -1, fruit, &n_eaten);
             game_end=self_collision_check(head);
 
         } else if (strcmp(command, "d")==0) {
 
-            board.data[head->previous->position.y][head->previous->position.x]="_";
-            board.data[head->position.y][head->position.x+1]="#";
+            if (!(head->position.x==fruit.x && head->position.y==fruit.y)) {
+                board.data[head->previous->position.y][head->previous->position.x]=95;
+            }
+            board.data[head->position.y][head->position.x+1]=35;
 
-            move(head, 1, 0, fruit, n_eaten);
+            move(head, 1, 0, fruit, &n_eaten);
             game_end=self_collision_check(head);
 
 
         } else {
             printf("COMANDO NAO RECONHECIDO");
         }
+
+        print_board(board);
 
         if (n_eaten==board.size_x*board.size_y-1) {
             win=1;
