@@ -66,35 +66,37 @@ pos create_fruit(int fruit_x, int fruit_y) {
     return fruit;    
 }
 
-void move(node head, int move_x, int move_y) {
+void move(node head, int move_x, int move_y, pos fruit, int *n_eaten) {
     node temp_node=head->previous;
-
-    head->previous->position=head->position;
-
-    head->position.x+=move_x;
-    head->position.y+=move_y;
-
-    if (head->previous!=NULL) {
-        head->previous->previous->next=head;
-        head->previous=head->previous->previous;
-
-        temp_node->previous=head;
-        temp_node->next=head->next;
-
-        head->next->previous=temp_node;
-        head->next=temp_node;
-    }
-}
-
-int collision_check(node head, pos fruit, int *n_eaten) {
-    int i;
-    node current_node;
-    current_node=head->next;
 
     if (head->position.x==fruit.x && head->position.y==fruit.y) {
         n_eaten++;
-        eat_fruit(head);
+        eat_fruit(head, move_x, move_y);
+    } else {
+
+
+        head->previous->position=head->position;
+
+        head->position.x+=move_x;
+        head->position.y+=move_y;
+
+        if (head->previous!=NULL) {
+            head->previous->previous->next=head;
+            head->previous=head->previous->previous;
+
+            temp_node->previous=head;
+            temp_node->next=head->next;
+
+            head->next->previous=temp_node;
+            head->next=temp_node;
+        }
     }
+}
+
+int self_collision_check(node head) {
+    int i;
+    node current_node;
+    current_node=head->next;
 
     while (!current_node->is_head) {
         if (head->position.x==current_node->position.x && head->position.y==current_node->position.y) {
@@ -107,10 +109,23 @@ int collision_check(node head, pos fruit, int *n_eaten) {
     return 0;
 }
 
-void eat_fruit(node head) {
+void eat_fruit(node head, int move_x, int move_y) {
     node new, temp;
 
+    new=malloc(sizeof(node));
 
+    new->is_head=0;
+
+    new->position=head->position;  
+
+    head->next->previous=new;
+    new->next=head->previous;
+
+    new->previous=head;
+    head->next=new;
+    
+    head->position.x+=move_x;
+    head->position.y+=move_y;
 }
 
 
@@ -156,32 +171,32 @@ int main() {
             board.data[head->previous->position.y][head->previous->position.x]="_";
             board.data[head->position.y+1][head->position.x]="#";
 
-            move(head, 0, 1);
-            game_end=collision_check(head, fruit, n_eaten);
+            move(head, 0, 1, fruit, n_eaten);
+            game_end=self_collision_check(head);
 
         } else if (strcmp(command, "a")==0) {
 
             board.data[head->previous->position.y][head->previous->position.x]="_";
             board.data[head->position.y][head->position.x-1]="#";
 
-            move(head, -1, 0);
-            game_end=collision_check(head, fruit, n_eaten);
+            move(head, -1, 0, fruit, n_eaten);
+            game_end=self_collision_check(head);
 
         } else if (strcmp(command, "s")==0) {
 
             board.data[head->previous->position.y][head->previous->position.x]="_";
             board.data[head->position.y-1][head->position.x]="#";
 
-            move(head, 0, -1);
-            game_end=collision_check(head, fruit, n_eaten);
+            move(head, 0, -1, fruit, n_eaten);
+            game_end=self_collision_check(head);
 
         } else if (strcmp(command, "d")==0) {
 
             board.data[head->previous->position.y][head->previous->position.x]="_";
             board.data[head->position.y][head->position.x+1]="#";
 
-            move(head, 1, 0);
-            game_end=collision_check(head, fruit, n_eaten);
+            move(head, 1, 0, fruit, n_eaten);
+            game_end=self_collision_check(head);
 
 
         } else {
