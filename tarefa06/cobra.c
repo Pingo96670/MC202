@@ -16,9 +16,26 @@ struct node_type {
 };
 
 
-node create_head(int x, int y);
+node create_head(int head_x, int head_y) {
+    node head;
 
-pos create_fruit(int x, int y);
+    head->next=head;
+    head->previous=head;
+
+    head->position.x=head_x;
+    head->position.y=head_y;
+
+    return head;
+}
+
+pos create_fruit(int fruit_x, int fruit_y) {
+    pos fruit;
+
+    fruit.x=fruit_x;
+    fruit.y=fruit_y;
+
+    return fruit;    
+}
 
 void move_x(node head, int x);
 
