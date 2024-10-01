@@ -294,7 +294,6 @@ int main() {
         } else if (strcmp(command, "transpor")==0) {
             scanf("%d %d %d", &start, &end, &offset);
 
-
             // Busca do nó de início da subsequência, utilizado na impressão
             start_node=DNA_sequence_start;
 
