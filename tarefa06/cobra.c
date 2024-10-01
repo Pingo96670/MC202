@@ -23,6 +23,14 @@ struct node_type {
     node next;
 };
 
+int mod(int a, int b) {
+    if (a>=0) {
+        return a%b;
+    }
+
+    return b+a%b;
+}
+
 char **create_matrix(int i, int j) {
     int k, l;
     char **matrix;
@@ -66,38 +74,42 @@ pos create_fruit(int fruit_x, int fruit_y) {
     return fruit;    
 }
 
-void eat_fruit(node head, int move_x, int move_y) {
+void eat_fruit(node head, int move_x, int move_y, board board) {
     node new;
 
-    new=malloc(sizeof(node));
+    new=malloc(sizeof(struct node_type));
 
     new->is_head=0;
+    
+    new->position=head->position;
 
-    new->position=head->position; 
-
+    
+    
     new->previous=head;
-    new->next=head->previous;
-
+    new->next=head->next;
+    
     head->next->previous=new;
     head->next=new;
     
-    head->position.x+=move_x;
-    head->position.y+=move_y;
+    head->position.x=abs(mod(head->position.x+move_x, board.size_x));
+    head->position.y=abs(mod(head->position.y+move_y, board.size_y));
 }
 
-void move(node head, int move_x, int move_y, pos fruit, int *n_eaten) {
+void move(node head, int move_x, int move_y, pos fruit, int *n_eaten, board board) {
     node temp_node=head->previous;
 
-    if (head->position.x+move_x==fruit.x && head->position.y+move_y==fruit.y) {
+    if (abs(mod(head->position.x+move_x, board.size_x))==fruit.x && abs(mod(head->position.y+move_y, board.size_y))==fruit.y) {
         *n_eaten+=1;
-        eat_fruit(head, move_x, move_y);
+        
+        eat_fruit(head, move_x, move_y, board);
+
     } else {
 
 
         head->previous->position=head->position;
 
-        head->position.x+=move_x;
-        head->position.y+=move_y;
+        head->position.x=abs(mod(head->position.x+move_x, board.size_x));
+        head->position.y=abs(mod(head->position.y+move_y, board.size_y));
 
         if (head->previous!=NULL) {
             head->previous->previous->next=head;
@@ -128,9 +140,6 @@ int self_collision_check(node head) {
 }
 
 
-
-
-
 void print_board(board board) {
     int i, j;
 
@@ -148,9 +157,10 @@ void free_game(node head, board board) {
     node current_node, next_node;
 
     current_node=head->next;
+    next_node=head->next;
 
     while (!current_node->is_head) {
-        next_node=current_node->next;
+        next_node=next_node->next;
         free(current_node);
         current_node=next_node;
     }
@@ -196,42 +206,42 @@ int main() {
 
         } else if (strcmp(command, "w")==0) {
 
-            if (!(head->position.x==fruit.x && head->position.y-1==fruit.y)) {
+            if (!(head->position.x==fruit.x && abs(mod(head->position.y-1,board.size_y))==fruit.y)) {
                 board.data[head->previous->position.y][head->previous->position.x]=95;
             }
-            board.data[head->position.y-1][head->position.x]=35;
+            board.data[abs(mod(head->position.y-1, board.size_y))][head->position.x]=35;
 
-            move(head, 0, -1, fruit, &n_eaten);
+            move(head, 0, -1, fruit, &n_eaten, board);
             game_end=self_collision_check(head);
 
         } else if (strcmp(command, "a")==0) {
 
-            if (!(head->position.x-1==fruit.x && head->position.y==fruit.y)) {
+            if (!(abs(mod(head->position.x-1, board.size_x))==fruit.x && head->position.y==fruit.y)) {
                 board.data[head->previous->position.y][head->previous->position.x]=95;
             }
-            board.data[head->position.y][head->position.x-1]=35;
+            board.data[head->position.y][abs(mod(head->position.x-1, board.size_x))]=35;
 
-            move(head, -1, 0, fruit, &n_eaten);
+            move(head, -1, 0, fruit, &n_eaten, board);
             game_end=self_collision_check(head);
 
         } else if (strcmp(command, "s")==0) {
 
-            if (!(head->position.x==fruit.x && head->position.y+1==fruit.y)) {
+            if (!(head->position.x==fruit.x && (head->position.y+1)%board.size_y==fruit.y)) {
                 board.data[head->previous->position.y][head->previous->position.x]=95;
             }
-            board.data[head->position.y+1][head->position.x]=35;
+            board.data[(head->position.y+1)%board.size_y][head->position.x]=35;
 
-            move(head, 0, 1, fruit, &n_eaten);
+            move(head, 0, 1, fruit, &n_eaten, board);
             game_end=self_collision_check(head);
 
         } else if (strcmp(command, "d")==0) {
 
-            if (!(head->position.x+1==fruit.x && head->position.y==fruit.y)) {
+            if (!((head->position.x+1)%board.size_x==fruit.x && head->position.y==fruit.y)) {
                 board.data[head->previous->position.y][head->previous->position.x]=95;
             }
-            board.data[head->position.y][head->position.x+1]=35;
+            board.data[head->position.y][(head->position.x+1)%board.size_x]=35;
 
-            move(head, 1, 0, fruit, &n_eaten);
+            move(head, 1, 0, fruit, &n_eaten, board);
             game_end=self_collision_check(head);
 
 
@@ -239,7 +249,9 @@ int main() {
             printf("COMANDO NAO RECONHECIDO");
         }
 
-        print_board(board);
+        if (!game_end) {
+            print_board(board);
+        }
 
         if (n_eaten==board.size_x*board.size_y-1) {
             game_end=1;
@@ -252,7 +264,7 @@ int main() {
     if (win) {
         printf("YOU WIN");
     } else {
-        printf("YOU LOSE");
+        printf("GAME OVER");
     }
 
     free_game(head, board);
