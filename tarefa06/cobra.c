@@ -124,16 +124,9 @@ void move(node head, int move_x, int move_y, pos fruit, int *n_eaten, board boar
     }
 }
 
-int self_collision_check(node head) {
-    node current_node;
-    current_node=head->next;
-
-    while (!current_node->is_head) {
-        if (head->position.x==current_node->position.x && head->position.y==current_node->position.y) {
-            return 1;
-        } else {
-            current_node=current_node->next;
-        }
+int self_collision_check(node head, int move_x, int move_y, board board) {
+    if (board.data[abs(mod(head->position.y+move_y, board.size_y))][abs(mod(head->position.x+move_x, board.size_x))]==35) {
+        return 1;
     }
 
     return 0;
@@ -205,16 +198,20 @@ int main() {
             board.data[i][j]=42;
 
         } else if (strcmp(command, "w")==0) {
+            game_end=self_collision_check(head, 0, -1, board);
 
             if (!(head->position.x==fruit.x && abs(mod(head->position.y-1,board.size_y))==fruit.y)) {
                 board.data[head->previous->position.y][head->previous->position.x]=95;
             }
             board.data[abs(mod(head->position.y-1, board.size_y))][head->position.x]=35;
 
+            
+
             move(head, 0, -1, fruit, &n_eaten, board);
-            game_end=self_collision_check(head);
 
         } else if (strcmp(command, "a")==0) {
+
+            game_end=self_collision_check(head, -1, 0, board);
 
             if (!(abs(mod(head->position.x-1, board.size_x))==fruit.x && head->position.y==fruit.y)) {
                 board.data[head->previous->position.y][head->previous->position.x]=95;
@@ -222,9 +219,10 @@ int main() {
             board.data[head->position.y][abs(mod(head->position.x-1, board.size_x))]=35;
 
             move(head, -1, 0, fruit, &n_eaten, board);
-            game_end=self_collision_check(head);
 
         } else if (strcmp(command, "s")==0) {
+
+            game_end=self_collision_check(head, 0, 1, board);
 
             if (!(head->position.x==fruit.x && (head->position.y+1)%board.size_y==fruit.y)) {
                 board.data[head->previous->position.y][head->previous->position.x]=95;
@@ -232,9 +230,10 @@ int main() {
             board.data[(head->position.y+1)%board.size_y][head->position.x]=35;
 
             move(head, 0, 1, fruit, &n_eaten, board);
-            game_end=self_collision_check(head);
 
         } else if (strcmp(command, "d")==0) {
+
+            game_end=self_collision_check(head, 1, 0, board);
 
             if (!((head->position.x+1)%board.size_x==fruit.x && head->position.y==fruit.y)) {
                 board.data[head->previous->position.y][head->previous->position.x]=95;
@@ -242,7 +241,6 @@ int main() {
             board.data[head->position.y][(head->position.x+1)%board.size_x]=35;
 
             move(head, 1, 0, fruit, &n_eaten, board);
-            game_end=self_collision_check(head);
 
 
         } else {
