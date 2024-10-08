@@ -145,8 +145,8 @@ void simplify_expression(node root) {
         case '&':
             if (root->left->data=='F' || root->right->data=='F') {
                 root->data='F';
-                free(root->left);
-                free(root->right);
+                free_tree(root->left);
+                free_tree(root->right);
                 root->left=root->right=NULL;
             } else if (root->left->data=='T') {
                 temp_node=root->right;
@@ -175,8 +175,8 @@ void simplify_expression(node root) {
         case '|':
             if ((root->left->data=='T' || root->right->data=='T')) {
                 root->data='T';
-                free(root->left);
-                free(root->right);
+                free_tree(root->left);
+                free_tree(root->right);
                 root->left=root->right=NULL;
             } else if (root->left->data=='F') {
                 temp_node=root->right;
