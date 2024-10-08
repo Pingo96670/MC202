@@ -88,6 +88,86 @@ void de_morgan(node root) {
 
 }
 
+int is_equivalent(node root_exp1, node root_exp2) {
+
+    return 0;
+    }
+
+void simplify_expression(node root) {
+    node temp_node;
+
+    if (root->left!=NULL) {
+        simplify_expression(root->left);
+    }
+
+    if (root->right!=NULL) {
+        simplify_expression(root->right);
+    }
+
+    switch (root->data) {
+        case 'T':
+            if (root->is_negative) {
+                root->data='F';
+            }
+            break;
+        case 'F':
+            if (root->is_negative) {
+                root->data='T';
+            }
+            break;
+        case '&':
+            if (root->left->data=='F' || root->right->data=='F') {
+                root->data='F';
+                free(root->left);
+                free(root->right);
+                root->left=root->right=NULL;
+            } else if (root->left->data=='T') {
+                temp_node=root->right;
+
+                root->data=root->right->data;
+                root->left=root->right->left;
+                root->right=root->right->right;
+
+                free(temp_node);
+            } else if (root->right->data=='T' || is_equivalent(root->left, root->right)) {
+                temp_node=root->left;
+
+                root->data=root->left->data;
+                root->left=root->left->left;
+                root->right=root->left->right;
+
+                free(temp_node);
+            }
+            break;
+        case '|':
+            if (root->left->data=='T' || root->right->data=='T') {
+                root->data='T';
+                free(root->left);
+                free(root->right);
+                root->left=root->right=NULL;
+            } else if (root->left->data=='F') {
+                temp_node=root->right;
+
+                root->data=root->right->data;
+                root->left=root->right->left;
+                root->right=root->right->right;
+
+                free(temp_node);
+            } else if (root->right->data=='F' || is_equivalent(root->left, root->right)) {
+                temp_node=root->left;
+
+                root->data=root->left->data;
+                root->left=root->left->left;
+                root->right=root->left->right;
+
+                free(temp_node);
+            }
+            break;
+        default:
+            break;
+    }
+}
+
 void print_tree(node root) {
     if (root!=NULL) {
         if(root->is_negative) {
@@ -119,6 +199,8 @@ int main() {
     de_morgan(tree);
     print_tree(tree);
     printf("\n");
+    simplify_expression(tree);
+    print_tree(tree);
 
     return 0;
 }
