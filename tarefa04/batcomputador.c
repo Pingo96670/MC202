@@ -136,7 +136,7 @@ void bat_free(mem *bat_mem, int address) {
         bat_mem->num_array[address+i]=-1;
     }
 
-    while (mem_used<=bat_mem->size/4 && bat_mem->size>8) {
+    while (mem_used<=bat_mem->size/4 && bat_mem->size>INITIAL_MEMORY_SIZE) {
         if (can_cleanup(bat_mem)) {
             mem_cleanup(bat_mem);
 
