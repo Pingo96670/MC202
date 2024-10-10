@@ -87,108 +87,88 @@ node remove_nucleotide(node DNA_start, int pos) {
 // Função para inverter o prefixo da sequência
 // Utiliza recursão, trocando os nucleotídeos dos nós start e end, então progredindo para a subsequência interior
 // Como não altera os endereços do nós, não retorna nada
-void reverse_prefix(node DNA_start, int len) {
-    int i;
+// OBS: É utilizada também na inversão de sufixo, invertendo por completo a subsequência correspondente ao sufixo
+void reverse_prefix(node sequence_start, node sequence_end, int len) {
     char temp;
-    node start, end;
-
-    start=DNA_start;
-    end=DNA_start;
     
-    for (i=0; i<len-1; i++) {
-        end=end->next;
-    }
-    
-    temp=start->nucleotide;
-    start->nucleotide=end->nucleotide;
-    end->nucleotide=temp;
+    temp=sequence_start->nucleotide;
+    sequence_start->nucleotide=sequence_end->nucleotide;
+    sequence_end->nucleotide=temp;
 
     if (len-2>1) {
-        reverse_prefix(start->next, len-2);
+        reverse_prefix(sequence_start->next, sequence_end->previous, len-2);
     }
-}
-
-// Função para inverter o sufixo da sequência
-// Define start como sendo o começo do sufixo, depois utiliza a função reverse_prefix aplicada sobre a subsequência inteira
-void reverse_suffix(node DNA_start, int len) {
-    int i;
-    node start;
-
-    start=DNA_start;
-    
-    for (; start->next!=NULL; start=start->next);
-
-    for (i=0; i<len-1; i++) {
-        start=start->previous;
-    }
-    
-    reverse_prefix(start, len);
 }
 
 // Função para transpor uma subsequência
 // Retorna o nó correspondente ao começo da sequência
+// O nó last_in_offset corresponde ao último nó pertencente à transposição, ou seja, aquele que virá antes de start_node ou depois  após a operação ser concluída
 node transpose_sequence(node DNA_start, int start, int end, int offset) {
     int i;
-    node start_node, end_node, temp_node;
+    node start_node, end_node, last_in_offset, temp_node;
 
-    if (offset!=0) {
-        start_node=DNA_start;
-        end_node=DNA_start;
+    start_node=DNA_start;
+    end_node=DNA_start;
 
-        for (i=0; i<start; i++) {
-            start_node=start_node->next;
+    for (i=0; i<start; i++) {
+        start_node=start_node->next;
+    }
+
+    for (i=0; i<end; i++) {
+        end_node=end_node->next;
+    }
+
+    // Transposição para a direita
+    // O nó last_in_offset corresponde àquele que virá antes de start_node após a operação ser concluída
+    if (offset>0) {
+        last_in_offset=end_node;
+
+        for (i=0; i<offset; i++) {
+            last_in_offset=last_in_offset->next;
         }
 
-        for (i=0; i<end; i++) {
-            end_node=end_node->next;
-        }
+        temp_node=last_in_offset->next;
 
-        if (start==0) {
+        if (start_node->previous!=NULL) {
+            start_node->previous->next=end_node->next;
+        } else {
             DNA_start=end_node->next;
         }
+        end_node->next->previous=start_node->previous;
 
-        if (offset>0) {
-            temp_node=end_node->next->next;
+        start_node->previous=last_in_offset;
+        last_in_offset->next=start_node;
 
-            if (start_node->previous!=NULL) {
-                start_node->previous->next=end_node->next;
-            } else {
-                DNA_start=start_node->next;
-            }
-
-            end_node->next->previous=start_node->previous;
-
-            start_node->previous=end_node->next;
-            end_node->next->next=start_node;
-
-            if (temp_node!=NULL) {
-                temp_node->previous=end_node;
-            }
-
-            end_node->next=temp_node;
-
-            transpose_sequence(DNA_start, start+1, end+1, offset-1);
-
-        } else if (offset<0) {
-            temp_node=start_node->previous->previous;
-
-            if (end_node->next!=NULL){
-                end_node->next->previous=start_node->previous;
-            }
-
-            start_node->previous->next=end_node->next;
-
-            end_node->next=start_node->previous;
-            start_node->previous->previous=end_node;
-
-            if (temp_node!=NULL) {
-                temp_node->next=start_node;
-            }
-
-            start_node->previous=temp_node;
-
-            transpose_sequence(DNA_start, start-1, end-1, offset+1);
+        if (temp_node!=NULL) {
+            temp_node->previous=end_node;
         }
+        end_node->next=temp_node;
+
+    // Transposição para a esquerda
+    // O nó last_in_offset corresponde àquele que virá depois de end_node após a operação ser concluída
+    } else {
+        last_in_offset=start_node;
+
+        for (i=0; i>offset; i--) {
+            last_in_offset=last_in_offset->previous;
+        }
+
+        temp_node=last_in_offset->previous;
+
+        if (end_node->next!=NULL) {
+            end_node->next->previous=start_node->previous;
+        }
+        start_node->previous->next=end_node->next;
+
+        end_node->next=last_in_offset;
+        last_in_offset->previous=end_node;
+
+        if (temp_node!=NULL) {
+            temp_node->next=start_node;
+        } else {
+            DNA_start=start_node;
+        }
+        start_node->previous=temp_node; 
     }
 
     return DNA_start;
@@ -225,14 +205,9 @@ void free_sequence(node DNA_sequence) {
 
     while (temp_current!=NULL) {
         temp_next=temp_current->next;
-        
         free(temp_current);
-
         temp_current=temp_next;
     }
-
-    free(temp_current);
-    free(temp_next);
 }
 
 
@@ -240,7 +215,7 @@ void free_sequence(node DNA_sequence) {
 int main() {
     int i, position, length, start, end, offset;
     char command[MAX_COMMAND_LENGTH], nucleotide;
-    node DNA_sequence_start=NULL, start_node;
+    node DNA_sequence_start=NULL, sequence_start, sequence_end;
     
     while (1) {
         
@@ -261,48 +236,54 @@ int main() {
         } else if (strcmp(command, "inverter-prefixo")==0) {
             scanf("%d", &length);
 
+            // Busca do nó do fim da subsequência
+            sequence_end=DNA_sequence_start;
+            for (i=0; i<length-1; i++) {
+                sequence_end=sequence_end->next;
+            }
+
             printf("prefixo ");
             print_sequence(DNA_sequence_start, 1, length);
             printf("-> ");
 
-            reverse_prefix(DNA_sequence_start, length);
+            reverse_prefix(DNA_sequence_start, sequence_end, length);
 
             print_sequence(DNA_sequence_start, 1, length);
 
 
+        // A inversão de sufixo utiliza a função reverse_prefix, utilizando o começo do sufixo como sequence_start e seu fim (ou seja, o fim da sequência principal) como sequence_end
         } else if (strcmp(command, "inverter-sufixo")==0) {
             scanf("%d", &length);
 
-            // Busca do nó de início da subsequência, utilizado na impressão
-            start_node=DNA_sequence_start;
+            // Busca dos nós de início e fim da subsequência
+            sequence_end=DNA_sequence_start;
+            for (; sequence_end->next!=NULL; sequence_end=sequence_end->next);
 
-            for (; start_node->next!=NULL; start_node=start_node->next);
-
+            sequence_start=sequence_end;
             for (i=0; i<length-1; i++) {
-                start_node=start_node->previous;
+                sequence_start=sequence_start->previous;
             }
 
             printf("sufixo ");
-            print_sequence(start_node, 1, length);
+            print_sequence(sequence_start, 1, length);
             printf("-> ");
 
-            reverse_suffix(DNA_sequence_start, length);
+            reverse_prefix(sequence_start, sequence_end, length);
 
-            print_sequence(start_node, 1, length);
+            print_sequence(sequence_start, 1, length);
 
 
         } else if (strcmp(command, "transpor")==0) {
             scanf("%d %d %d", &start, &end, &offset);
 
             // Busca do nó de início da subsequência, utilizado na impressão
-            start_node=DNA_sequence_start;
-
+            sequence_start=DNA_sequence_start;
             for (i=0; i<start; i++) {
-                start_node=start_node->next;
+                sequence_start=sequence_start->next;
             }
 
             printf("subsequencia ");
-            print_sequence(start_node, 1, end-start+1);
+            print_sequence(sequence_start, 1, end-start+1);
 
             if (offset>0) {
                 printf(">> %d", offset);
