@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <math.h>
 #include <assert.h>
 #define MAX_CITY_LEN 15
 
@@ -10,22 +11,34 @@ typedef struct coordinates {
     int y;
 } coords;
 
+typedef struct float_coordinates {
+    float x;
+    float y;
+} float_coords;
+
+
 enum node_category {internal_node, free_leaf, occupied_leaf};
 
 // Node struct for quaternary tree
 typedef struct node_type *node;
 struct node_type {
-    coords centre;
+    float_coords centre;
     node parent;
     enum node_category category;
     union {
-        struct internal_node {node north_west; node north_east; node south_west; node south_east;};
-        struct occupied_leaf {char city_name[MAX_CITY_LEN]; coords coord;};
+        struct {node north_west; node north_east; node south_west; node south_east;};
+        struct {char city_name[MAX_CITY_LEN]; coords city_coords;};
     };
 };
 
 
-node initialize_node(node node, int centre_x, int centre_y) {
+float distance(int a_x, int a_y, int b_x, int b_y) {
+    float temp=sqrt(pow(a_x-b_x, 2)+pow(a_y-b_y, 2));
+
+    return temp;
+}
+
+node initialize_node(node node, float centre_x, float centre_y) {
     node=malloc(sizeof(struct node_type));
     node->category=free_leaf;
     node->centre.x=centre_x;
@@ -36,19 +49,10 @@ node initialize_node(node node, int centre_x, int centre_y) {
 
 // Recursive function to free a quaternary tree in postorder
 void free_tree(node root) {
-    if (root->north_west!=NULL) {
+    if (root->category==internal_node) {
         free_tree(root->north_west);
-    }
-
-    if (root->north_east!=NULL) {
         free_tree(root->north_east);
-    }
-
-    if (root->south_west!=NULL) {
         free_tree(root->south_west);
-    }
-
-    if (root->south_east!=NULL) {
         free_tree(root->south_east);
     }
 
@@ -56,7 +60,7 @@ void free_tree(node root) {
 }
 
 
-node insert_city(node root, char city_name[MAX_CITY_LEN], int x, int y, coords centre) {
+node insert_city(node root, char city_name[MAX_CITY_LEN], int x, int y, float_coords centre) {
     char temp_name[MAX_CITY_LEN];
     coords temp_coords;
     node temp_node=root;
@@ -88,11 +92,13 @@ node insert_city(node root, char city_name[MAX_CITY_LEN], int x, int y, coords c
         case free_leaf:
             temp_node->category=occupied_leaf;
             strcpy(temp_node->city_name, city_name);
+            temp_node->city_coords.x=x;
+            temp_node->city_coords.y=y;
             break;
 
         case occupied_leaf:
             strcpy(temp_name, temp_node->city_name);
-            temp_coords=temp_node->coord;
+            temp_coords=temp_node->city_coords;
             temp_node->category=internal_node;
 
             root->north_west=initialize_node(root->north_west, centre.x/2, centre.y+centre.y/2);
@@ -107,7 +113,9 @@ node insert_city(node root, char city_name[MAX_CITY_LEN], int x, int y, coords c
         
         default:
             assert(0);
-    } 
+    }
+
+    return root;
 }
 
 node search_in_point(node node, int search_x, int search_y) {
@@ -142,8 +150,41 @@ node search_in_point(node node, int search_x, int search_y) {
     return node;
 }
 
-void search_in_region() {
+void search_in_region(node node, int circle_x, int circle_y, int radius) {
+    switch (node->category) {
+    case internal_node:
+        if (circle_x+radius>node->centre.x) {
+            if (circle_y+radius>node->centre.y) {
+                search_in_region(node->north_east, circle_x, circle_y, radius);
+            }
 
+            if (circle_y-radius<node->centre.y) {
+                search_in_region(node->south_east, circle_x, circle_y, radius);
+            }
+        }
+
+        if (circle_x-radius<node->centre.x) {
+            if (circle_y+radius>node->centre.y) {
+                search_in_region(node->north_west, circle_x, circle_y, radius);
+            }
+
+            if (circle_y-radius<node->centre.y) {
+                search_in_region(node->south_west, circle_x, circle_y, radius);
+            }
+        }
+        break;
+
+    case free_leaf:
+        break;
+
+    case occupied_leaf:
+        if (distance(node->city_coords.x, node->city_coords.y, circle_x, circle_y)<=radius) {
+            printf(" %s", node->city_name);
+        }
+    
+    default:
+        break;
+    }
 }
 
 void remove_from_point() {
@@ -156,13 +197,13 @@ void print_from_point() {
 
 
 int main() {
-    int dimensions, end_program=0, coord_x, coord_y;
+    int dimensions, end_program=0, coord_x, coord_y, radius;
     char command, city_name[MAX_CITY_LEN];
-    node tree=NULL;
+    node tree=NULL, found_point;
 
     scanf("%d", &dimensions);
 
-    tree=initialize_node(tree, dimensions/2, dimensions/2);
+    tree=initialize_node(tree, (dimensions+1)/2, (dimensions+1)/2);
 
     while(!end_program) {
         scanf(" %c", &command);
@@ -173,17 +214,30 @@ int main() {
 
                 insert_city(tree, city_name, coord_x, coord_y, tree->centre);
 
+                printf("Cidade %s inserida no ponto (%d,%d).\n", city_name, coord_x, coord_y);
+
                 break;
 
             case 'b':
                 scanf("%d %d", &coord_x, &coord_y);
 
-                printf(search_in_point(tree, coord_x, coord_y)->city_name);
+                found_point=search_in_point(tree, coord_x, coord_y);
+
+                if (found_point->category==occupied_leaf && (found_point->city_coords.x=coord_x && found_point->city_coords.y==coord_y)) {
+                    printf("Cidade %s encontrada no ponto (%d,%d).\n", found_point->city_name, coord_x, coord_y);
+                } else {
+                    printf("Nenhuma cidade encontrada no ponto (%d,%d).\n", coord_x, coord_y);
+                }
 
                 break;
 
             case 'o':
-                //
+                scanf("%d %d %d", &coord_x, &coord_y, &radius);
+
+                printf("Cidades a distancia %d de (%d,%d):", radius, coord_x, coord_y);
+                search_in_region(tree, coord_x, coord_y, radius);
+                printf("\n");
+
                 break;
 
             case 'r':
@@ -191,7 +245,6 @@ int main() {
                 break;
 
             case 'p':
-                //
                 break;
 
             case 's':
