@@ -18,17 +18,17 @@ void insert_in_cache() {}
 
 
 int main() {
-    int *cache, cache_size, range, n_accesses, *access_list, n_insertions=0, current_num, i, *heap_pos;
+    int *cache, cache_size, n_distincts, n_accesses, *access_list, n_insertions=0, current_num, i, *heap_pos;
     prio_queue prio_q;
 
-    scanf("%d %d %d", &cache_size, &range, &n_accesses);
+    scanf("%d %d %d", &cache_size, &n_distincts, &n_accesses);
 
     cache=malloc(cache_size*sizeof(int));
-    prio_q=initialize_priority_queue(range);
+    prio_q=initialize_priority_queue(n_distincts);
     access_list=malloc(n_accesses*sizeof(int));
-    heap_pos=malloc(range*sizeof(int));
+    heap_pos=malloc(n_distincts*sizeof(int));
 
-    for (i=0; i<range; i++) {
+    for (i=0; i<n_distincts; i++) {
         heap_pos[i]=i;
     }
 
@@ -63,9 +63,15 @@ int main() {
 
     printf("%d", n_insertions);
 
+    free(cache);
     free(access_list);
-    free(prio_q->data_array[0]->positions);
+
+    for (i=0; i<n_distincts; i++) {
+        free(prio_q->data_array[i]->positions);
+    }
+
     free(prio_q->data_array);
+    free(heap_pos);
 
     return 0;
 }
