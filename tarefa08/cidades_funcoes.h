@@ -42,8 +42,8 @@ void free_tree(node root);
 void insert_city(node root, char city_name[MAX_CITY_LEN], int x, int y, float_coords centre, node parent_node);
 
 // Recursive function to search for a node in given (x,y) coordinates
-// Returns the found node
-node search_for_point(node node, int search_x, int search_y);
+// Returns a temporary node with city name, coordinate and node type information from the original
+node search_for_point_info(node node, int search_x, int search_y);
 
 // Recursive function to print the names of all cities inside a given radius from a point
 void search_in_region(node node, int circle_x, int circle_y, int radius);
@@ -56,6 +56,6 @@ int branch_collapse_check(node node);
 // Alters the tree directly
 void collapse_branch(node node);
 
-// Function to remove a city from the given (x,y) coordinates
+// Function to search for and remove a city from the given (x,y) coordinates
 // Alters the tree directly
-void remove_from_point(node node_to_remove, int x, int y);
+void remove_from_point(node root, int x, int y);

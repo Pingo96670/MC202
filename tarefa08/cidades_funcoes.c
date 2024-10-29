@@ -122,50 +122,38 @@ void insert_city(node root, char city_name[MAX_CITY_LEN], int x, int y, float_co
 }
 
 // Recursive function to search for a leaf in given (x,y) coordinates
-// Returns the found node
-node search_for_point(node node, int search_x, int search_y) {
-    switch (node->category) {
-        // If internal node:
-        // Finds the correct quadrant, then recursively searches over it
-        case internal_node:
-            if (search_x<=node->centre.x) {
-                if (search_y<=node->centre.y) {
-                    node=search_for_point(node->south_west, search_x, search_y);
-                } else {
-                    node=search_for_point(node->north_west, search_x, search_y);
-                }
+// Returns a temporary node with city name, coordinate and node type information from the original
+node search_for_point_info(node orig_node, int search_x, int search_y) {
+    node temp_node;
+
+    temp_node=malloc(sizeof(struct node_type));
+
+    while (orig_node->category==internal_node) {
+        if (search_x<=orig_node->centre.x) {
+            if (search_y<=orig_node->centre.y) {
+                orig_node=orig_node->south_west;
             } else {
-                if (search_y<=node->centre.y) {
-                    node=search_for_point(node->south_east, search_x, search_y);
-                } else {
-                    node=search_for_point(node->north_east, search_x, search_y);
-                }
+                orig_node=orig_node->north_west;
             }
-
-            break;
-        
-        // If free leaf:
-        // Breaks, then returns the found node
-        case free_leaf:
-            break;
-
-        // If occupied leaf:
-        // Breaks, then returns the found node
-        case occupied_leaf:
-            break;
-        
-        // If no matching cases:
-        // Raises error
-        // Shouldn't occur
-        default:
-            assert(0);
+        } else {
+            if (search_y<=orig_node->centre.y) {
+                orig_node=orig_node->south_east;
+            } else {
+                orig_node=orig_node->north_east;
+            }
+        }
     }
 
-    return node;
+    temp_node->category=orig_node->category;
+    strcpy(temp_node->city_name, orig_node->city_name);
+    temp_node->city_coords=orig_node->city_coords;
+
+    return temp_node;
 }
 
 // Recursive function to print the names of all cities inside a given radius from a point
 void search_in_region(node node, int circle_x, int circle_y, int radius) {
+    
     switch (node->category) {
         // If internal node:
         // Finds the correct quadrant, then recursively searches over it
@@ -292,11 +280,28 @@ void collapse_branch(node node) {
 }
 
 
-// Function to remove a city from the given (x,y) coordinates
+// Function to search for and remove a city from the given (x,y) coordinates
 // Simply changes an occupied leaf's category to free leaf
 // Collapses the branch if possible
 // Alters the tree directly
-void remove_from_point(node node_to_remove, int x, int y) {
+void remove_from_point(node root, int x, int y) {
+    node node_to_remove=root;
+    
+    while (node_to_remove->category==internal_node)    
+        if (x<=node_to_remove->centre.x) {
+                    if (y<=node_to_remove->centre.y) {
+                        node_to_remove=node_to_remove->south_west;
+                    } else {
+                        node_to_remove=node_to_remove->north_west;
+                    }
+                } else {
+                    if (y<=node_to_remove->centre.y) {
+                        node_to_remove=node_to_remove->south_east;
+                    } else {
+                        node_to_remove=node_to_remove->north_east;
+                    }
+                }
+
     node_to_remove->category=free_leaf;
 
     if (node_to_remove->parent!=NULL && branch_collapse_check(node_to_remove->parent)) {

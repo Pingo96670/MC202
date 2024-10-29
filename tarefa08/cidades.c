@@ -37,13 +37,15 @@ int main() {
             case 'b':
                 scanf("%d %d", &coord_x, &coord_y);
 
-                found_point=search_for_point(tree, coord_x, coord_y);
+                found_point=search_for_point_info(tree, coord_x, coord_y);
 
                 if (found_point->category==occupied_leaf && (found_point->city_coords.x==coord_x && found_point->city_coords.y==coord_y)) {
                     printf("Cidade %s encontrada no ponto (%d,%d).\n", found_point->city_name, coord_x, coord_y);
                 } else {
                     printf("Nenhuma cidade encontrada no ponto (%d,%d).\n", coord_x, coord_y);
                 }
+
+                free(found_point);
 
                 break;
 
@@ -62,11 +64,13 @@ int main() {
             case 'r':
                 scanf("%d %d", &coord_x, &coord_y);
 
-                found_point=search_for_point(tree, coord_x, coord_y);
+                found_point=search_for_point_info(tree, coord_x, coord_y);
 
                 printf("Cidade %s removida do ponto (%d,%d).\n", found_point->city_name, coord_x, coord_y);
 
-                remove_from_point(found_point, coord_x, coord_y);
+                remove_from_point(tree, coord_x, coord_y);
+
+                free(found_point);
 
                 break;
 
