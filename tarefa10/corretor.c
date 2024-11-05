@@ -21,6 +21,34 @@ int main() {
         add_to_dict(dict, temp_word);
     }
 
+    // Check given words
+    for (i=0; i<words_to_check; i++) {
+        // Analyze word
+        scanf("%s", temp_word.word);
+        temp_word.len=strlen(temp_word.word);
+        result=spell_checker(dict, temp_word);
+
+        // Print results
+        printf("%s: ", temp_word.word);
+
+        switch (result) {
+        case 'r':
+            printf("vermelho\n");
+            break;
+
+        case 'y':
+            printf("amarelo\n");
+            break;
+
+        case 'g':
+            printf("verde\n");
+            break;
+
+        default:
+            break;
+        }
+    }
+
     free(dict);
 
     return 0;
