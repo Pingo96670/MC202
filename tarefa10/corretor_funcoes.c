@@ -40,9 +40,9 @@ void add_to_dict(word* dict, word word) {
 char compare_words(word wordA, word wordB, char current_result) {
     int i, difference_counter=0;
 
-    if (diff(wordA.len, wordB.len)>=2) {
+    if (current_result!='y' && diff(wordA.len, wordB.len)>=2) {
         return 'r';
-    } else if (diff(wordA.len, wordB.len)==1) {
+    } else if (current_result!='y' && diff(wordA.len, wordB.len)==1) {
         if (wordA.len>wordB.len) {
             for (i=0; i<wordB.len; i++) {
                 if (wordA.word[i+difference_counter]!=wordB.word[i]) {
@@ -74,7 +74,7 @@ char compare_words(word wordA, word wordB, char current_result) {
                 difference_counter++;
             }
 
-            if (difference_counter==2) {
+            if (current_result!='y' && difference_counter==2) {
                 return 'r';
             }
         }
