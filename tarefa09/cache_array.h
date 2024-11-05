@@ -18,4 +18,7 @@ pos_array initialize_array(int len, int n_accesses, int n);
 // Reallocates memory if needed
 void insert_pos_in_array(pos_array array, int n);
 
+// Debloats an array's allocated memory
+void debloat_array(pos_array* aux_pos_array, int n_distinct);
+
 
