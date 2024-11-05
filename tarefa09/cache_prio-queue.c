@@ -33,24 +33,20 @@ void swap_pos_array(pos_array* a, pos_array* b) {
 // Returns the initialized struct
 prio_queue initialize_cache(int cache_size, int n_accesses, int n_distinct) {
     int i;
-    prio_queue prio_q;
+    prio_queue cache;
 
-    prio_q=malloc(sizeof(struct priority_queue));
-    prio_q->data_array=malloc(cache_size*sizeof(pos_array));
-    prio_q->aux_cache_array=calloc(n_distinct, sizeof(int));
-    prio_q->cache_heap_pos_array=malloc(n_distinct*sizeof(int));
+    cache=malloc(sizeof(struct priority_queue));
+    cache->data_array=malloc(cache_size*sizeof(pos_array));
+    cache->aux_cache_array=calloc(n_distinct, sizeof(int));
+    cache->cache_heap_pos_array=malloc(n_distinct*sizeof(int));
     
-    for (i=0; i<cache_size; i++) {
-        prio_q->data_array[i]=initialize_array(INITIAL_ARRAY_SIZE, n_accesses, i);
-    }
-
     for (i=0; i<n_distinct; i++) {
-        prio_q->cache_heap_pos_array[i]=DUMMY_POS;
+        cache->cache_heap_pos_array[i]=DUMMY_POS;
     }
 
-    prio_q->n_elements=0;
+    cache->n_elements=0;
 
-    return prio_q;
+    return cache;
 }
 
 // Function to send a value up the heap

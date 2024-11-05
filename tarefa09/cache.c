@@ -45,7 +45,7 @@ void free_cache(prio_queue cache, int cache_size) {
     free(cache->aux_cache_array);
     free(cache->cache_heap_pos_array);
 
-    // cache->data_array is freed by free_aux_pos_array
+    // Components of cache->data_array are freed by free_aux_pos_array
 
     free(cache->data_array);
     free(cache);
