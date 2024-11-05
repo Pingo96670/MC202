@@ -21,4 +21,5 @@ void insert_pos_in_array(pos_array array, int n);
 // Debloats an array's allocated memory
 void debloat_array(pos_array* aux_pos_array, int n_distinct);
 
-
+// Frees up memory allocated to aux_pos_array
+void free_aux_pos_array(pos_array* aux_pos_array, int n_distinct);

@@ -40,3 +40,15 @@ void debloat_array(pos_array* aux_pos_array, int n_distinct) {
         aux_pos_array[i]->size=aux_pos_array[i]->n_elements;
     }
 }
+
+// Frees up memory allocated to aux_pos_array
+void free_aux_pos_array(pos_array* aux_pos_array, int n_distinct) {
+    int i;
+
+    for (i=0; i<n_distinct; i++) {
+        free(aux_pos_array[i]->positions);
+        free(aux_pos_array[i]);
+    }
+
+    free(aux_pos_array);
+}

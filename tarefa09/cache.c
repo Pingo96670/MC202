@@ -41,15 +41,11 @@ void insert_in_cache(prio_queue cache, int n, pos_array* aux_pos_array) {
 
 // Frees up the cache's allocated memory
 void free_cache(prio_queue cache, int cache_size) {
-    int i;
 
     free(cache->aux_cache_array);
     free(cache->cache_heap_pos_array);
 
-    for (i=0; i<cache_size; i++) {
-        free(cache->data_array[i]->positions);
-        free(cache->data_array[i]);
-    }
+    // cache->data_array is freed by free_aux_pos_array
 
     free(cache->data_array);
     free(cache);
@@ -100,7 +96,7 @@ int main() {
 
     // Freeing memory
     free(access_list);
-    free(aux_pos_array);
+    free_aux_pos_array(aux_pos_array, n_distinct);
     free_cache(cache, cache_size);
 
     return 0;
